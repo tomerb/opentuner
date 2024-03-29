@@ -29,6 +29,8 @@ parser.add_argument('--domain', type=float, default=1000,
 parser.add_argument('--function', default='rosenbrock',
                     choices=('rosenbrock', 'sphere', 'beale'),
                     help='function to use')
+parser.add_argument('--metric-log',
+                    help='File name of metric data in CSV format')
 
 
 class Rosenbrock(MeasurementInterface):
@@ -74,6 +76,10 @@ class Rosenbrock(MeasurementInterface):
         called at the end of autotuning with the best resultsdb.models.Configuration
         """
         print("Final configuration", configuration.data)
+
+        if self.args.metric_log:
+            with open(self.args.metric_log, 'a') as f:
+                f.write(f"{self.args.dimensions},{self.args.domain},{self.args.test_limit},{configuration.data[0]},{configuration.data[1]}\n")
 
 
 if __name__ == '__main__':
