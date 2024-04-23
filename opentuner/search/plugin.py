@@ -130,8 +130,7 @@ class FileDisplayPlugin(SearchPlugin):
                   result.time, file=self.out)
             self.out.flush()
         if self.details:
-            print((result.collection_date - self.start_date).total_seconds(), \
-                  result.time, file=self.details)
+            print(result.time, result.configuration.data, file=self.details)
             self.details.flush()
 
 

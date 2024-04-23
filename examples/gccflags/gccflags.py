@@ -95,7 +95,7 @@ class GccFlagsTuner(opentuner.measurement.MeasurementInterface):
 
     def extract_gcc_version(self):
         m = re.search(r'([0-9]+)[.]([0-9]+)[.]([0-9]+)', subprocess.check_output([
-            self.args.cc, '--version']))
+            self.args.cc, '--version']).decode('ascii'))
         if m:
             gcc_version = tuple(map(int, m.group(1, 2, 3)))
         else:
@@ -114,7 +114,7 @@ class GccFlagsTuner(opentuner.measurement.MeasurementInterface):
         else:
             # extract flags from --help=optimizers
             optimizers, err = subprocess.Popen([self.args.cc, '--help=optimizers'],
-                                               stdout=subprocess.PIPE).communicate()
+                                               stdout=subprocess.PIPE, universal_newlines=True).communicate()
             found_cc_flags = re.findall(r'^  (-f[a-z0-9-]+) ', optimizers,
                                         re.MULTILINE)
             log.info('Determining which of %s possible gcc flags work',
@@ -160,7 +160,7 @@ class GccFlagsTuner(opentuner.measurement.MeasurementInterface):
         each one to test.
         """
         params, err = subprocess.Popen(
-            [self.args.cc, '--help=params'], stdout=subprocess.PIPE).communicate()
+            [self.args.cc, '--help=params'], stdout=subprocess.PIPE, universal_newlines=True).communicate()
         all_params = re.findall(r'^  ([a-z0-9-]+) ', params, re.MULTILINE)
         all_params = sorted(set(all_params) &
                             set(self.cc_param_defaults.keys()))
@@ -185,10 +185,10 @@ class GccFlagsTuner(opentuner.measurement.MeasurementInterface):
         if compile_result['returncode'] != 0:
             log.warning("removing flag %s because it results in compile error", flag)
             return False
-        if 'warning: this target' in compile_result['stderr']:
+        if 'warning: this target' in compile_result['stderr'].decode('utf-8'):
             log.warning("removing flag %s because not supported by target", flag)
             return False
-        if 'has been renamed' in compile_result['stderr']:
+        if 'has been renamed' in compile_result['stderr'].decode('utf-8'):
             log.warning("removing flag %s because renamed", flag)
             return False
         if try_inverted and flag[:2] == '-f':
